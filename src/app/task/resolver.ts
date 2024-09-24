@@ -3,7 +3,6 @@ import { GraphqlContext } from "../../interfaces";
 import TaskService, { UpdateTask } from "../../services/task";
 import { createTaskPayload } from "../../services/task";
 import UserService from "../../services/user";
-import asyncHandler from "express-async-handler";
 
 const mutations = {
   createTask: async (
@@ -49,7 +48,6 @@ const mutations = {
 
 const queries = {
   getTask: async (parent: any, args: any, ctx: GraphqlContext) => {
-    console.log(ctx.user);
     if (!ctx.user) throw new Error("You are not authenticated");
     const tasks = await TaskService.getTask(ctx.user.id);
 
