@@ -16,36 +16,56 @@ export interface UpdateTask {
 
 class TaskService {
   public static async createTask(data: createTaskPayload) {
-    const task = await prismaClient.task.create({
-      data: {
-        title: data.title,
-        description: data.description,
-        status: data.status,
-        user: { connect: { id: data.userId } },
-      },
-    });
+    try {
+      const task = await prismaClient.task.create({
+        data: {
+          title: data.title,
+          description: data.description,
+          status: data.status,
+          user: { connect: { id: data.userId } },
+        },
+      });
 
-    return task;
+      return task;
+    } catch (error) {
+      console.error("Error creating task:", error);
+      throw new Error("Failed to create task");
+    }
   }
 
   public static async getTask(userId: string) {
-    const tasks = await prismaClient.task.findMany({
-      where: { userId },
-    });
-    return tasks;
+    try {
+      const tasks = await prismaClient.task.findMany({
+        where: { userId },
+      });
+      return tasks;
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      throw new Error("Failed to fetch tasks");
+    }
   }
 
   public static async deleteTask(id: string) {
-    return await prismaClient.task.delete({
-      where: { id },
-    });
+    try {
+      return await prismaClient.task.delete({
+        where: { id },
+      });
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      throw new Error("Failed to delete task");
+    }
   }
 
   public static async updateTasK(id: string, payload: UpdateTask) {
-    return prismaClient.task.update({
-      where: { id },
-      data: payload,
-    });
+    try {
+      return await prismaClient.task.update({
+        where: { id },
+        data: payload,
+      });
+    } catch (error) {
+      console.error("Error updating task:", error);
+      throw new Error("Failed to update task");
+    }
   }
 }
 

@@ -5,22 +5,45 @@ import { prismaClient } from "../../clients/db";
 
 const queries = {
   verifyGoogleToken: async (parent: any, { token }: { token: string }) => {
-    const resultToken = await UserService.verifyGoogleAuthToken(token);
-    return resultToken;
+    try {
+      const resultToken = await UserService.verifyGoogleAuthToken(token);
+      return resultToken;
+    } catch (error) {
+      console.error("Error verifying Google token:", error);
+      throw new Error("Failed to verify Google token");
+    }
   },
+
   getCurrentUser: async (parent: any, args: any, ctx: GraphqlContext) => {
     const id = ctx.user?.id;
-    if (!id) return null;
+    if (!id) {
+      console.warn("No user ID found in context");
+      return null;
+    }
 
-    const user = await UserService.getUserById(id);
-    return user;
+    try {
+      const user = await UserService.getUserById(id);
+      return user;
+    } catch (error) {
+      console.error("Error fetching current user:", error);
+      throw new Error("Failed to retrieve current user");
+    }
   },
 };
 
 const extraResolvers = {
   User: {
-    task: (parent: User) =>
-      prismaClient.task.findMany({ where: { user: { id: parent.id } } }),
+    task: async (parent: User) => {
+      try {
+        const tasks = await prismaClient.task.findMany({
+          where: { user: { id: parent.id } },
+        });
+        return tasks;
+      } catch (error) {
+        console.error("Error fetching tasks for user:", error);
+        throw new Error("Failed to retrieve tasks for the user");
+      }
+    },
   },
 };
 

@@ -11,25 +11,33 @@ const mutations = {
     ctx: GraphqlContext
   ) => {
     if (!ctx.user) throw new Error("You are not authenticated");
-    const task = await TaskService.createTask({
-      ...payload,
-      userId: ctx.user.id,
-    });
 
-    return task;
+    try {
+      const task = await TaskService.createTask({
+        ...payload,
+        userId: ctx.user.id,
+      });
+      return task;
+    } catch (error) {
+      console.error("Error creating task:", error);
+      throw new Error("Failed to create task");
+    }
   },
 
   deleteTask: async (
     parent: any,
-    { id }: { id: string }, // Adjusting the type based on your Task model
+    { id }: { id: string },
     ctx: GraphqlContext
   ) => {
     if (!ctx.user) throw new Error("You are not authenticated");
 
-    // Delete the task
-    await TaskService.deleteTask(id);
-
-    return "Task deleted successfully";
+    try {
+      await TaskService.deleteTask(id);
+      return "Task deleted successfully";
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      throw new Error("Failed to delete task");
+    }
   },
 
   updateTask: async (
@@ -39,25 +47,40 @@ const mutations = {
   ) => {
     if (!ctx.user) throw new Error("You are not authenticated");
 
-    // Update the task
-    const updatedTask = await TaskService.updateTasK(id, payload);
-
-    return updatedTask;
+    try {
+      const updatedTask = await TaskService.updateTasK(id, payload);
+      return updatedTask;
+    } catch (error) {
+      console.error("Error updating task:", error);
+      throw new Error("Failed to update task");
+    }
   },
 };
 
 const queries = {
   getTask: async (parent: any, args: any, ctx: GraphqlContext) => {
     if (!ctx.user) throw new Error("You are not authenticated");
-    const tasks = await TaskService.getTask(ctx.user.id);
 
-    return tasks;
+    try {
+      const tasks = await TaskService.getTask(ctx.user.id);
+      return tasks;
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      throw new Error("Failed to retrieve tasks");
+    }
   },
 };
 
 const extraResolvers = {
   Task: {
-    user: (parent: Task) => UserService.getUserById(parent.userId),
+    user: async (parent: Task) => {
+      try {
+        return await UserService.getUserById(parent.userId);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        throw new Error("Failed to retrieve user");
+      }
+    },
   },
 };
 
